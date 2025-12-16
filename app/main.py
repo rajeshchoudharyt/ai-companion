@@ -1,14 +1,14 @@
-import langchain
-from fastapi import FastAPI
+# import langchain
 import uvicorn
+from fastapi import FastAPI
 from dotenv import load_dotenv
 
-load_dotenv()
-langchain.verbose = False
-langchain.debug = False
-langchain.llm_cache = False
+from app.agents.agent import run_agent
 
-from app.utils.tools import llm
+load_dotenv()
+# langchain.verbose = False
+# langchain.debug = False
+# langchain.llm_cache = False
 
 app = FastAPI()
 
@@ -16,6 +16,10 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
+@app.post("/agent")
+async def run_ai_agent(query: str):
+    run_agent(query=query)
+    return {"status": "Agent run successfully"}
 
 if __name__ == "__main__":
     uvicorn.run(
