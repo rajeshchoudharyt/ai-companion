@@ -16,7 +16,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    run_agent(query="hello, how are you?")
+    run_agent(query="I want to start coding")
     return {"message": "Hello World"}
 
 # @app.post("/agent")
