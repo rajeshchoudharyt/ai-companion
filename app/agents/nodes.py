@@ -1,17 +1,20 @@
-# import requests
 from app.agents.schemas import UserMemory
-from utils.tools import llm
-from app.agents.agent import WorkingState
+from app.utils.tools import llm
+from app.agents.schemas import WorkingState
 
 # basic input message normalizer
 def input_normalizer(state: WorkingState):
-    return { "query": "".join(state.query.strip())}
+    query = "".join(state.query.strip())
+    return { 
+        "query": query,
+        "messages": state.messages + [{"role": "user", "content": query}]
+    }
 
 
 def memory_extractor(state: WorkingState):
-    structured_llm = llm.with_structured_output(UserMemory)
-    structured_llm.invoke(
-        f'''
+    structured_llm = llm.with_structured_output(UserMemory.model_json_schema())
+
+    prompt = f'''
         Follow below steps to extract user memories:
 
         Step 1: 
@@ -26,7 +29,7 @@ def memory_extractor(state: WorkingState):
         Step 2:
         - Analyse the user emotion only for the last user message.
         - Consider the context of the conversation to determine the emotion.
-        - Identify the point of trigger for the emotion if aplicable.
+        - Identify the point of trigger for the emotion if applicable.
         - Describe the emotion in the below dimensions with values between 0.0 to 1.0.
         - If no specific emotion is detected, return an empty dictionary.
             Example: {{ emotion: {{}} }}
@@ -64,4 +67,10 @@ def memory_extractor(state: WorkingState):
         {state.messages}
 
         '''
-    )
+
+    response = structured_llm.invoke(prompt)
+
+    return { 
+        "memory": state.memory + response["memory"],  # type: ignore
+        "emotion": state.emotion + [response["emotion"]]  # type: ignore
+    }
