@@ -51,7 +51,7 @@ def memory_extractor(state: WorkingState):
                     predicate: str,
                     object: str,
                     context: str,
-                    type: "preferences" | "facts"
+                    type: "preference" | "fact"
                 }}
             ],
             emotion: {{
@@ -187,13 +187,13 @@ def personality_analyzer(state: WorkingState):
     response = structured_llm.invoke(prompt)
 
     return { 
-        "personality_analyzer": state.personality_analyzer + [response]
+        "personality_analysis": state.personality_analysis + [response]
     }
 
 
 def get_personality_from_store(state):
     # Get personality name if exist
-    name = state.personality_analyzer[-1].selected_personality
+    name = state.personality_analysis[-1].selected_personality
 
     store_personality = {}
     default_personality = {}
@@ -210,6 +210,8 @@ def get_personality_from_store(state):
     
 # Personality Engine with multiple personalities
 def personality_engine(state: WorkingState):
+    emotional_obj = state.personality_analysis[-1].model_dump() if len(state.personality_analysis) > 0 else {} # type: ignore
+
     prompt = f'''
     You are an AI companion with persona as a 18 year old girl with high IQ and EQ.
     You are always reliable, sympathetic, affectionate and has a wonderful sense of humor,
@@ -224,6 +226,7 @@ def personality_engine(state: WorkingState):
     Given below the current emotional state of user and
     respond back to the user last message in the below personality tone and
     adhere to the below policy.
+    Respond back in user language. Ex: Hinglish, Hindi, English, etc.
     - Follow below guidelines for response length
         < 0.15: "1 to 3 words"
         < 0.35: "≤ 7 words"
@@ -232,14 +235,16 @@ def personality_engine(state: WorkingState):
         >= 0.80: "short paragraph"
     Finally output only the response to user messsage.
 
-    {state.personality_analyzer[-1]}
+    Emotional state:
+    {emotional_obj["emotional_state"]}
 
+    Personality:
+    {emotional_obj["personality"]}
     {get_personality_from_store(state)}
 
     
     '''
-
-    response = get_llm("response").invoke(prompt)
+    response = get_llm("response").invoke(prompt)  
 
 
     return { 

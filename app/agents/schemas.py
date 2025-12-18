@@ -8,7 +8,7 @@ class Fivetuple(BaseModel):
     predicate: str
     object: str
     context: str
-    type:  Literal["preferences", "facts"]
+    type:  Literal["preference", "fact"]
 
 class Emotion(BaseModel):
     emotion: str
@@ -47,7 +47,7 @@ class WorkingState(BaseModel):
     messages: list[Message] = []
     query: str = ""
     emotion: list[Emotion | dict] = []
-    personality_analyzer: list[PersonalityAnalyzer | dict] = []
+    personality_analysis: list[PersonalityAnalyzer | dict] = []
    
 
 # ------------------------- Personality schema -------------------------

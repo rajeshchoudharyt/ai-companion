@@ -2,6 +2,9 @@
 import uvicorn
 import os
 import json
+import openai
+
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -30,24 +33,22 @@ async def root():
     return {"message": "Hello World"}
 
 
-class Agent(BaseModel):
+class User(BaseModel):
     id: str
     query: str
 
+
 @app.post("/agent/")
-async def run_ai_agent(user: Agent):
+async def run_ai_agent(user: User):
+    memory = {}
     try:
-        config: RunnableConfig = {"configurable": { "thread_id": user.id}} 
-
-        agent = run_agent(query=user.query, config=config)
-        agent_state = agent.get_state(config).values
-        
-        print("store", json.dumps(agent_state, indent=2))
-
+        memory = run_agent(query=user.query, user_id=user.id)
+    except openai.RateLimitError:
+        raise HTTPException(status_code=429, detail="Rate limit error")
     except:
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-    return { "data": agent_state }
+    return memory
 
 
 # Server config

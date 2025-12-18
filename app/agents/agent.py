@@ -1,7 +1,4 @@
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import InMemorySaver
-from langchain_core.runnables import RunnableConfig
-
 from app.agents.schemas import WorkingState
 from app.agents.nodes import input_normalizer, memory_extractor, personality_analyzer, personality_engine
 
@@ -22,10 +19,20 @@ graph.add_edge("memory_extractor", "personality_analyzer")
 graph.add_edge("personality_analyzer", "personality_engine")
 graph.add_edge("personality_engine", END)
 
-checkpointer = InMemorySaver()
-agent = graph.compile(checkpointer=checkpointer)
+store = {}
+agent = graph.compile()
 
+def run_agent(query: str, user_id: str):
+    user_exist = user_id in store
 
-def run_agent(query: str, config: RunnableConfig):
-    agent.invoke(WorkingState(query=query), config)
-    return agent
+    working_state:WorkingState
+    if user_exist:
+        store[user_id]["query"] = query
+        working_state = WorkingState.model_validate(store[user_id])
+    else:
+        working_state = WorkingState(query=query)
+    
+    store[user_id] = agent.invoke(working_state)
+
+    return store[user_id]
+    
