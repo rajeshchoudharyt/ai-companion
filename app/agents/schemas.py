@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Literal, TypedDict
 
+# ------------------------- User memory -------------------------
+
 class Fivetuple(BaseModel):
     subject: str
     predicate: str
@@ -25,6 +27,9 @@ class UserMemory(BaseModel):
     memory: list[Fivetuple | list] = []
     emotion: Emotion | dict
 
+
+# ------------------------- Graph state -------------------------
+
 class EmotionalState(BaseModel):
     emotion: str
     mood: str
@@ -37,7 +42,6 @@ class Message(TypedDict):
     content: str
 
 
-# Graph state
 class WorkingState(BaseModel):
     memory: list[Fivetuple | list] = []
     messages: list[Message] = []
@@ -45,7 +49,9 @@ class WorkingState(BaseModel):
     emotion: list[Emotion | dict] = []
     personality_analyzer: list[PersonalityAnalyzer | dict] = []
    
-# Personality schema
+
+# ------------------------- Personality schema -------------------------
+
 class EmotionalTone(BaseModel):
     warmth: float = Field(ge=0.0, le=1.0)
     calmness: float = Field(ge=0.0, le=1.0)
@@ -67,7 +73,9 @@ class Personality(BaseModel):
     expressiveness: Expressiveness
     interaction_style: Interaction_style
 
-# Personality analyzer schema
+
+# ------------------------- Personality analyzer schema -------------------------
+
 class PersonalityAnalyzer(BaseModel):
     emotional_state: EmotionalState | dict
     personality: Personality | dict
