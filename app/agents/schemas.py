@@ -42,14 +42,6 @@ class Message(TypedDict):
     content: str
 
 
-class WorkingState(BaseModel):
-    memory: list[Fivetuple | list] = []
-    messages: list[Message] = []
-    query: str = ""
-    emotion: list[Emotion | dict] = []
-    personality_analysis: list[PersonalityAnalyzer | dict] = []
-   
-
 # ------------------------- Personality schema -------------------------
 
 class EmotionalTone(BaseModel):
@@ -80,3 +72,12 @@ class PersonalityAnalyzer(BaseModel):
     emotional_state: EmotionalState | dict
     personality: Personality | dict
     selected_personality: str
+
+
+class WorkingState(BaseModel):
+    memory: list[Fivetuple | list] = []
+    messages: list[Message] = []
+    query: str = ""
+    emotion: list[Emotion | dict] = []
+    personality_analysis: list[PersonalityAnalyzer | dict] = []
+   
